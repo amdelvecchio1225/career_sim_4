@@ -16,7 +16,7 @@ router.post("/register", async(req, res, next) => {
                 username: req.body.username,
                 password: hashedPassword
             }
-        })
+        });
 
         const token = jwt.sign({id: user.id}, process.env.JWT);
 
@@ -25,6 +25,31 @@ router.post("/register", async(req, res, next) => {
     } catch(err) {
         next(err);
     }
-})
+});
+
+router.post("/login", async(req, res, next) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: {username: req.body.username}
+        });
+
+        if (!user) {
+            return res.status(401).send("Invalid Login Credentials");
+        }
+
+        const isValid = bcrypt.compare(req.body.password, user.password);
+
+        if (!isValid) {
+            return res.status(401).send("Invalid Login Credentials");
+        }
+
+        const token = jwt.sign({id: user.id}, process.env.JWT);
+
+        res.send({token, user:{userId: user.id, username: user.username}});
+
+    } catch(err) {
+        next(err);
+    }
+});
 
 module.exports = router;

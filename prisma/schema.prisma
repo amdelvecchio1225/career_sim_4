@@ -22,5 +22,5 @@ model post {
   user      user    @relation(fields: [userId], references: [id])
   title     String
   content   String
-  userId    Int
+  userId    Int // relation scalar
 }

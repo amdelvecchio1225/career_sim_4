@@ -12,6 +12,22 @@ router.get('/', async(req, res, next) => {
     }
 })
 
+router.get('/user/:id', async(req, res, next) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where:{
+                id: Number(req.params.id)
+            },
+            include:{
+                posts: true
+            }
+        });
+        res.send(user.posts);
+    } catch(err) {
+        next(err);
+    }
+})
+
 router.get('/:id', async(req, res, next) => {
     try {
         const post = await prisma.post.findUnique({
@@ -27,12 +43,12 @@ router.get('/:id', async(req, res, next) => {
 
 router.delete('/:id', async(req, res, next) => {
     try {
-        const post = await prisma.post.delete({
+        const userPost = await prisma.post.delete({
             where: {
-                id: Number(req.params.id)
+                userId: Number(req.params.id)
             }
         });
-        res.send(post);
+        res.send(userPost);
     } catch(err) {
         next(err);
     }
@@ -42,7 +58,7 @@ router.put('/:id', async(req, res, next) => {
     try {
         const updatedPost = await prisma.post.update({
             where: {
-                id: Number(req.params.id)
+                userId: Number(req.params.id)
             },
             data: req.body
         });
@@ -54,7 +70,10 @@ router.put('/:id', async(req, res, next) => {
 
 router.post('/', async(req, res, next) => {
     try {
-        const post = await prisma.post.create({
+        const userPost = await prisma.post.create({
+            where: {
+                userId: Number(req.params.id)
+            },
             data: req.body
         });
         res.send(post);
